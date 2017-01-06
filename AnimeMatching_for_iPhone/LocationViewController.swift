@@ -10,11 +10,12 @@ import UIKit
 import CoreLocation
 
 class LocationViewController: UIViewController, CLLocationManagerDelegate {
-    
-    @IBOutlet weak var latTextField: UITextField!
-    @IBOutlet weak var lngTextField: UITextField!
-    
+    @IBOutlet weak var nameTextField: UITextField!
+    @IBOutlet weak var favoriteAnimationTextField: UITextField!
+
     var locationManager: CLLocationManager!
+    var latitude: CLLocationDegrees!
+    var longitude: CLLocationDegrees!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,7 +37,6 @@ class LocationViewController: UIViewController, CLLocationManagerDelegate {
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     // MARK: - CLLocationManager delegate
@@ -56,23 +56,23 @@ class LocationViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let newLocation = locations.last,
-            CLLocationCoordinate2DIsValid(newLocation.coordinate) else {
-                self.latTextField.text = "Error"
-                self.lngTextField.text = "Error"
-                return
-        }
+        guard let newLocation = locations.last, CLLocationCoordinate2DIsValid(newLocation.coordinate) else {return}
+
+        latitude = newLocation.coordinate.latitude
+        longitude = newLocation.coordinate.longitude
         
-        self.latTextField.text = "".appendingFormat("%.4f", newLocation.coordinate.latitude)
-        self.lngTextField.text = "".appendingFormat("%.4f", newLocation.coordinate.longitude)
+    }
+    
+    @IBAction func informationTransmission(_ sender: UIButton) {
+        
+        favoriteAnimationTextField.resignFirstResponder()
         
         // nifty
-        let latitude = newLocation.coordinate.latitude
-        let longitude = newLocation.coordinate.longitude
-        
         let obj = NCMBObject(className: "TestClass")
-        obj?.setObject(latitude, forKey: "latitude")
-        obj?.setObject(longitude, forKey: "longitude")
+        obj?.setObject(latitude, forKey: "Latitude")
+        obj?.setObject(longitude, forKey: "Longitude")
+        obj?.setObject(nameTextField.text, forKey: "Name")
+        obj?.setObject(favoriteAnimationTextField.text, forKey: "FavoriteAnimation")
         
         obj?.saveInBackground({(error) in
             if (error != nil) {
@@ -83,6 +83,7 @@ class LocationViewController: UIViewController, CLLocationManagerDelegate {
                 print("succeeded")
             }
         })
-        
+
     }
+    
 }
